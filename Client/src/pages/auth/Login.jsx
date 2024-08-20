@@ -1,10 +1,41 @@
 import { Link } from "react-router-dom";
 import login from '../../assets/images/login.jpg'
 import logo from '../../assets/images/logo.png';
+import useAuth from "../../hooks/useAuth";
 
 const Login = () => {
+  const { signInWithGoogle, signIn } = useAuth();
+
+
+    const handleGoogleLogin = () => {
+      signInWithGoogle()
+        .then((result) => {
+          console.log(result.user);
+          toast.success('Your google login is successful');
+        })
+        .catch((error) => console.log(error.message));
+    };
+
+  const handleSignIn = (e) => {
+    e.preventDefault();
+
+    const form = e.target;
+    const email = form.email.value;
+    const password = form.password.value;
+
+    console.log(email, password)
+    
+    signIn(email, password)
+      .then(result => {
+      console.log(result.user)
+      })
+    .catch(error => console.log(error.message)
+    )
+  
+  }
+
   return (
-    <div className='flex justify-center items-center min-h-[calc(100vh-306px)]'>
+    <div className='flex justify-center items-center mt-8 mb-4'>
       <div className='flex w-full max-w-sm mx-auto overflow-hidden bg-white rounded-lg shadow-lg  lg:max-w-4xl '>
         <div
           className='hidden bg-cover bg-center lg:block lg:w-1/2'
@@ -48,7 +79,9 @@ const Login = () => {
               </svg>
             </div>
 
-            <span className='w-5/6 px-4 py-3 font-bold text-center'>
+            <span
+              onClick={handleGoogleLogin}
+              className='w-5/6 px-4 py-3 font-bold text-center'>
               Sign in with Google
             </span>
           </div>
@@ -62,7 +95,7 @@ const Login = () => {
 
             <span className='w-1/5 border-b dark:border-gray-400 lg:w-1/4'></span>
           </div>
-          <form>
+          <form onSubmit={handleSignIn}>
             <div className='mt-4'>
               <label
                 className='block mb-2 text-sm font-medium text-gray-600 '

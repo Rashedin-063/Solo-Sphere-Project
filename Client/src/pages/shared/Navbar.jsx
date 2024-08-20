@@ -18,7 +18,7 @@ const Navbar = () => {
         </div>
       </div>
       <div className='flex-none'>
-        <ul className='menu menu-horizontal px-1 flex items-center gap-4'>
+        <ul className='menu menu-horizontal px-1 flex items-center gap-6'>
           <Link to='/'>
             <div>Home</div>
           </Link>
@@ -39,9 +39,11 @@ const Navbar = () => {
             >
               <div className='w-10 rounded-full' title=''>
                 <img
+                  // referrerPolicy='no-referrer'
                   referrerPolicy='no-referrer'
+                  title={user?.displayName}
                   alt='User Profile Photo'
-                  src={user.photoURL}
+                  src={user?.photoURL}
                 />
               </div>
             </div>

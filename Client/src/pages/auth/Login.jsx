@@ -2,21 +2,25 @@ import { Link } from "react-router-dom";
 import login from '../../assets/images/login.jpg'
 import logo from '../../assets/images/logo.png';
 import useAuth from "../../hooks/useAuth";
+import { toast } from 'react-toastify';
 
 const Login = () => {
   const { signInWithGoogle, signIn } = useAuth();
 
 
-    const handleGoogleLogin = () => {
-      signInWithGoogle()
+  const handleGoogleLogin = async() => {
+    try {
+      await signInWithGoogle()
         .then((result) => {
           console.log(result.user);
           toast.success('Your google login is successful');
         })
-        .catch((error) => console.log(error.message));
-    };
+    } catch (error) {
+      console.log(error.message)
+    }
+  }
 
-  const handleSignIn = (e) => {
+  const handleSignIn = async(e) => {
     e.preventDefault();
 
     const form = e.target;
@@ -25,12 +29,15 @@ const Login = () => {
 
     console.log(email, password)
     
-    signIn(email, password)
+    try {
+      await signIn(email, password)
       .then(result => {
-      console.log(result.user)
+        console.log(result.user)
+        toast.success('Login successful')
       })
-    .catch(error => console.log(error.message)
-    )
+    } catch (error) {
+      console.log(error.message)
+    }
   
   }
 

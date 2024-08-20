@@ -1,20 +1,52 @@
 import { Link } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
-import {toast} from 'react-toastify'
+import { toast } from 'react-toastify'
+import logo from '../../assets/images/logo.png';
 
 const Register = () => {
   
-  const { signInWithGoogle } = useAuth();
+  const { signInWithGoogle, createUser, updateUserProfile } = useAuth();
 
-  const handleGoogleLogin = () => {
-    signInWithGoogle()
+  const handleGoogleLogin = async() => {
+   try {
+    await signInWithGoogle()
       .then(result => {
         console.log(result.user);
 toast.success('Your google login is successful')
       })
-    .catch(error => console.log(error.message)
-    )
-}
+   } catch (error) {
+    console.log(error.message)
+   }
+  }
+  
+   const handleSignUp = async (e) => {
+     e.preventDefault();
+
+     const form = e.target;
+     const name = form.name.value;
+     const photo = form.photo.value;
+     const email = form.email.value;
+     const password = form.password.value;
+
+     console.log(name, photo,email, password);
+
+  try {
+       await createUser(email, password)
+       .then((result) => {
+         console.log(result.user);
+         updateUserProfile(name, photo)
+           .then(() => {
+           console.log('profile updated')
+           })
+         .catch(error => console.log(error.message)
+         )
+         toast.success('Registration successful')
+
+       })
+  } catch (error) {
+    console.log(error.message)
+  }
+   };
 
   return (
     <div className='flex justify-center items-center min-h-[calc(100vh-306px)] my-12'>
@@ -23,7 +55,7 @@ toast.success('Your google login is successful')
           <div className='flex justify-center mx-auto'>
             <img
               className='w-auto h-7 sm:h-8'
-              src='https://merakiui.com/images/logo.svg'
+              src={logo}
               alt=''
             />
           </div>
@@ -68,7 +100,7 @@ toast.success('Your google login is successful')
 
             <span className='w-1/5 border-b dark:border-gray-400 lg:w-1/4'></span>
           </div>
-          <form>
+          <form onSubmit={handleSignUp}>
             <div className='mt-4'>
               <label
                 className='block mb-2 text-sm font-medium text-gray-600 '

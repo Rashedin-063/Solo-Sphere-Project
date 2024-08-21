@@ -10,22 +10,23 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <Root />,
-    errorElement: <ErrorPage/>,
+    errorElement: <ErrorPage />,
     children: [
       {
         index: true,
-        element: <Home/>
+        element: <Home />,
+        // loader: () => fetch(`${import.meta.env.VITE_API_URL}/jobs`),
       },
       {
         path: '/login',
-        element: <Login/>
+        element: <Login />,
       },
       {
         path: '/register',
-        element: <Register/>
-      }
-   ]
-  }
-])
+        element: <Register />,
+      },
+    ],
+  },
+]);
 
 export default router;

@@ -1,8 +1,21 @@
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 import JobCard from '../../components/JobCard';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 const TabCAtegories = () => {
+
+  const [jobs, setJobs] = useState([]);
+
+  useEffect(() => {
+    const fetchDetails = async () => {
+      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/jobs`);
+      setJobs(data)
+    };
+    fetchDetails()
+  },[])
+
   return (
     <div className='text-center my-12'>
       <h1 className='text-3xl lg:text-4xl font-semibold mb-2 lg:mb-4'>
@@ -17,22 +30,36 @@ const TabCAtegories = () => {
         <Tabs>
           <TabList>
             <Tab>Web Development</Tab>
-            <Tab>Graphics Design</Tab>
+            <Tab>UI / Ux Design</Tab>
             <Tab>Digital Marketing</Tab>
           </TabList>
 
           <TabPanel>
-            <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3  justify-center items-center gap-x-4'>
-              <JobCard />
-              <JobCard />
-              <JobCard />
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  justify-center items-center gap-x-4 w-3/4 mx-auto md:w-full'>
+              {jobs
+                .filter((j) => j.category === 'Web Development')
+                .map((job) => (
+                  <JobCard key={job._id} job={job} />
+                ))}
             </div>
           </TabPanel>
           <TabPanel>
-            <h2>Any content 2</h2>
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  justify-center items-center gap-x-4 w-3/4 mx-auto md:w-full'>
+              {jobs
+                .filter((j) => j.category === 'UI/UX Design')
+                .map((job) => (
+                  <JobCard key={job._id} job={job} />
+                ))}
+            </div>
           </TabPanel>
           <TabPanel>
-            <h2>Any content 3</h2>
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  justify-center items-center gap-x-4 w-3/4 mx-auto md:w-full'>
+              {jobs
+                .filter((j) => j.category === 'Digital Marketing')
+                .map((job) => (
+                  <JobCard key={job._id} job={job} />
+                ))}
+            </div>
           </TabPanel>
         </Tabs>
       </div>

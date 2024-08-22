@@ -1,11 +1,13 @@
 /* eslint-disable react/prop-types */
 
+import { Link } from "react-router-dom";
+
 const JobCard = ({ job }) => {
  
   const { _id, job_title, category, description, deadline, max_price, min_price, buyer_email } = job;
   
   return (
-    <div className='w-full max-w-sm px-4 py-3 bg-white rounded-md shadow-md hover:scale-[1.05] transition-all mt-8 space-y-4 lg:space-y-8'>
+    <Link to={`job/${_id}`} className='w-full max-w-sm px-4 py-3 bg-white rounded-md shadow-md hover:scale-[1.05] transition-all mt-8 space-y-4 lg:space-y-8'>
       <div className='flex items-center justify-between'>
         <span className='text-xs text-gray-800 '>Deadline: {deadline}</span>
         <span
@@ -34,7 +36,7 @@ const JobCard = ({ job }) => {
           Range: ${min_price} - ${max_price}
         </p>
       </div>
-    </div>
+    </Link>
   );
 }
 

@@ -74,6 +74,23 @@ async function run() {
       res.send(result);
     });
 
+    app.put('/job/:id', async (req, res) => {
+      const id = req.params.id;
+      const jobData = req.body;
+      const query = { _id: new ObjectId(id) }
+      const options = { upsert: true };
+
+      const updatedDoc = {
+        $set: {
+          ...jobData
+        }
+      }
+
+      const result = await jobCollection.updateOne(query, updatedDoc, options)
+
+      res.send(result)
+    })
+
     app.delete('/job/:id', async (req, res) => {
       const id = req.params.id;
       

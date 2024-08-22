@@ -149,7 +149,7 @@ const MyPostedJobs = () => {
                       <td className='px-4 py-4 text-sm whitespace-nowrap'>
                         <div className='flex items-center gap-x-6'>
                           <Link
-                            to='/jobs/update'
+                            to={`/update/${job._id}`}
                             className='text-red-500 transition-colors duration-200   hover:text-yellow-500 focus:outline-none'
                           >
                             <svg

@@ -55,6 +55,14 @@ async function run() {
       res.send(result)
     })
 
+    app.get('/jobs/:email', async (req, res) => {
+      const email = req.params.email;
+      const query = {'buyer.email': email}
+
+      const result = await jobCollection.find(query).toArray();
+      res.send(result)
+    })
+
     app.post('/jobs', async (req, res) => {
       const jobData = req.body;
 
@@ -65,6 +73,15 @@ async function run() {
 
       res.send(result);
     });
+
+    app.delete('/job/:id', async (req, res) => {
+      const id = req.params.id;
+      
+      const query = { _id: new ObjectId(id) };
+
+      const result = await jobCollection.deleteOne(query)
+      res.send(result)
+    }) 
 
     // bids related api
     app.post('/bids', async (req, res) => {

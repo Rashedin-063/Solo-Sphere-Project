@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 const JobCard = ({ job }) => {
  
-  const { _id, job_title, category, description, deadline, max_price, min_price, buyer_email } = job;
+  const { _id, job_title, category, description, deadline, max_price, min_price } = job;
   
   return (
     <Link
@@ -16,14 +16,14 @@ const JobCard = ({ job }) => {
           Deadline: {new Date(deadline).toLocaleDateString()}
         </span>
         <span
-          className={`px-3 py-1 text-[8px]  rounded-full ${
+          className={`px-3 py-1 text-[10px]  rounded-full font-semibold ${
             category === 'Web Development' &&
-            'text-blue-800 uppercase bg-blue-200'
+            'text-blue-600 uppercase bg-blue-100'
           } ${
-            category === 'UI/UX Design' && 'text-red-800 uppercase bg-red-200'
+            category === 'UI/UX Design' && 'text-red-600 uppercase bg-red-100'
           } ${
             category === 'Digital Marketing' &&
-            'text-green-800 uppercase bg-green-200'
+            'text-green-600 uppercase bg-green-100'
           }`}
         >
           {category}

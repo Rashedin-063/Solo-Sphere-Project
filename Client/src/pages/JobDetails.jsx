@@ -21,7 +21,7 @@ const JobDetails = () => {
      deadline,
      max_price,
      min_price,
-     buyer_email,
+     buyer
    } = job;
   
   const handleBidForm = async (e) => {
@@ -37,15 +37,14 @@ const JobDetails = () => {
     const comment = form.comment.value;
     const deadline = startDate;
     const email = user?.email;
-    if (user?.email === buyer_email) {
+    if (user?.email === buyer?.email) {
       return toast.warn('Action not permitted')
     } 
     // const buyer_email = buyer_email;
     const status = 'Pending';
 
     const bidData = {
-      jobId, price, comment, deadline, job_title, category, email, status, buyer_email
-    }
+      jobId, price, comment, deadline, job_title, category, email, status, buyer_email: buyer?.email}
     
 
 try {
@@ -59,11 +58,7 @@ try {
 } catch (error) {
   console.log(error.message)
   
-}
-  
-    
-    
-
+}   
   }
   
   return (
@@ -71,7 +66,7 @@ try {
       {/* Job Details */}
       <div className='flex-1  px-4 py-7 bg-white rounded-md shadow-md md:min-h-[350px]'>
         <div className='flex items-center justify-between'>
-          <span className='text-sm text-gray-800 '>Deadline: {deadline}</span>
+          <span className='text-sm text-gray-800 '>Deadline: {new Date(deadline).toLocaleDateString()}</span>
           <span className='px-4 py-1 text-xs text-blue-800 uppercase bg-blue-200 rounded-full '>
             {category}
           </span>
@@ -88,13 +83,13 @@ try {
           </p>
           <div className='flex items-center gap-5'>
             <div>
-              <p className='mt-2 text-sm  text-gray-600 '>Name: Jhankar Vai.</p>
+              <p className='mt-2 text-sm  text-gray-600 '>Name: {buyer?.name || 'Jhonkar Bhai'}</p>
               <p className='mt-2 text-sm  text-gray-600 '>
-                Email: {buyer_email}
+                Email: {buyer?.email || 'buyer@gmail.com'}
               </p>
             </div>
-            <div className='rounded-full object-cover overflow-hidden w-14 h-14'>
-              <img src='' alt='' />
+            <div className='rounded-full object-cover overflow-hidden w-12 h-12'>
+              <img src={buyer?.photo} alt='' />
             </div>
           </div>
           <p className='mt-6 text-lg font-bold text-gray-600 '>
@@ -110,6 +105,7 @@ try {
 
         <form onSubmit={handleBidForm}>
           <div className='grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2'>
+            {/* price */}
             <div>
               <label className='text-gray-700 ' htmlFor='price'>
                 Price

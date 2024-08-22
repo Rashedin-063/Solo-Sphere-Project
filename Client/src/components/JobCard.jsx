@@ -7,9 +7,14 @@ const JobCard = ({ job }) => {
   const { _id, job_title, category, description, deadline, max_price, min_price, buyer_email } = job;
   
   return (
-    <Link to={`job/${_id}`} className='w-full max-w-sm px-4 py-3 bg-white rounded-md shadow-md hover:scale-[1.05] transition-all mt-8 space-y-4 lg:space-y-8'>
+    <Link
+      to={`job/${_id}`}
+      className='w-full max-w-sm px-4 py-3 bg-white rounded-md shadow-md hover:scale-[1.05] transition-all mt-8 space-y-4 lg:space-y-8'
+    >
       <div className='flex items-center justify-between'>
-        <span className='text-xs text-gray-800 '>Deadline: {deadline}</span>
+        <span className='text-xs text-gray-800 '>
+          Deadline: {new Date(deadline).toLocaleDateString()}
+        </span>
         <span
           className={`px-3 py-1 text-[8px]  rounded-full ${
             category === 'Web Development' &&
@@ -17,7 +22,8 @@ const JobCard = ({ job }) => {
           } ${
             category === 'UI/UX Design' && 'text-red-800 uppercase bg-red-200'
           } ${
-            category === 'Digital Marketing' && 'text-green-800 uppercase bg-green-200'
+            category === 'Digital Marketing' &&
+            'text-green-800 uppercase bg-green-200'
           }`}
         >
           {category}

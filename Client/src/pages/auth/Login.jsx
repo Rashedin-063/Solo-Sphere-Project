@@ -1,11 +1,16 @@
-import { Link } from "react-router-dom";
+import { Link, replace, useLocation, useNavigate } from "react-router-dom";
 import login from '../../assets/images/login.jpg'
 import logo from '../../assets/images/logo.png';
 import useAuth from "../../hooks/useAuth";
 import { toast } from 'react-toastify';
 
 const Login = () => {
-  const { signInWithGoogle, signIn } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const from = location.state || '/'
+
+  const { signInWithGoogle, signIn, user, loading } = useAuth();
 
 
   const handleGoogleLogin = async() => {
@@ -14,6 +19,7 @@ const Login = () => {
         .then((result) => {
           console.log(result.user);
           toast.success('Your google login is successful');
+          navigate(from, {replace: true})
         })
     } catch (error) {
       console.log(error.message)
@@ -34,12 +40,19 @@ const Login = () => {
       .then(result => {
         console.log(result.user)
         toast.success('Login successful')
+        navigate(from, { replace: true });
       })
     } catch (error) {
       console.log(error.message)
     }
   
   }
+
+  if (user) {
+    navigate('/')
+  }
+
+  if (loading) return;
 
   return (
     <div className='flex justify-center items-center mt-8 mb-4'>

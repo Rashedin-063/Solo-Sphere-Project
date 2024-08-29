@@ -101,6 +101,23 @@ async function run() {
     }) 
 
     // bids related api
+    app.get('/my-bids/:email', async (req, res) => {
+      const email = req.params.email;
+      const query = { email };
+      const result = await bidCollection.find(query).toArray();
+
+      res.send(result)
+    })
+    
+    app.get('/bid-request/:email', async (req, res) => {
+      const email = req.params.email;
+      const query = { buyer_email: email };
+
+      const result = await bidCollection.find(query).toArray();
+
+      res.send(result)
+})
+
     app.post('/bids', async (req, res) => {
       const bidData = req.body;
 
@@ -120,6 +137,7 @@ async function run() {
     // await client.close();
   }
 }
+
 run().catch(console.dir);
 
 

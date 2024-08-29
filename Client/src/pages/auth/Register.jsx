@@ -1,10 +1,14 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 import { toast } from 'react-toastify'
 import logo from '../../assets/images/logo.png';
 import bgImg from '../../assets/images/register.jpg'
 
 const Register = () => {
+   const location = useLocation();
+  const navigate = useNavigate();
+
+  const from = location.state || '/'
   
   const { signInWithGoogle, createUser, updateUserProfile } = useAuth();
 
@@ -13,7 +17,8 @@ const Register = () => {
     await signInWithGoogle()
       .then(result => {
         console.log(result.user);
-toast.success('Your google login is successful')
+        toast.success('Your google login is successful')
+           navigate(from, { replace: true });
       })
    } catch (error) {
     console.log(error.message)
@@ -42,6 +47,7 @@ toast.success('Your google login is successful')
          .catch(error => console.log(error.message)
          )
          toast.success('Registration successful')
+            navigate(from, { replace: true });
 
        })
   } catch (error) {

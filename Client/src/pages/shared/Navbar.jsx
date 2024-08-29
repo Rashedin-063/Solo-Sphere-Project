@@ -6,7 +6,7 @@ const Navbar = () => {
   const { user, logOut } = useAuth();
   
   return (
-    <div className='navbar bg-base-100 shadow-sm container px-4 mx-auto'>
+    <div className='navbar bg-base-100 shadow-sm px-4 lg:px-6'>
       <div className='flex-1'>
         <div className='flex gap-2 items-center'>
           <img className='w-auto h-7' src={logo} alt='' />
@@ -14,15 +14,15 @@ const Navbar = () => {
         </div>
       </div>
       <div className='flex-none'>
-        <ul className='menu menu-horizontal px-1 flex items-center gap-6'>
-          <Link to='/'>
-            <div>Home</div>
-          </Link>
+        <ul className='menu menu-horizontal px-1'>
+          <li>
+            <Link to='/'>Home</Link>
+          </li>
 
           {!user && (
-            <Link to='/login'>
-              <div>Login</div>
-            </Link>
+            <li>
+              <Link to='/login'>Login</Link>
+            </li>
           )}
         </ul>
 
@@ -48,7 +48,9 @@ const Navbar = () => {
               className='menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52'
             >
               <li>
-                <Link to='/addJob' className='justify-between'>Add Job</Link>
+                <Link to='/addJob' className='justify-between'>
+                  Add Job
+                </Link>
               </li>
               <li>
                 <Link to='/myPostedJobs'>My Posted Jobs</Link>
@@ -57,12 +59,13 @@ const Navbar = () => {
                 <Link to='/myBids'>My Bids</Link>
               </li>
               <li>
-                <Link to='/bidRequest'>Bid Requests</Link>
+                <Link to='/bid-request'>Bid Requests</Link>
               </li>
               <li className='mt-2'>
                 <button
                   onClick={() => logOut()}
-                  className='bg-gray-200 block text-center text-black hover:text-white'>
+                  className='bg-gray-200 block text-center text-black hover:text-white'
+                >
                   Logout
                 </button>
               </li>

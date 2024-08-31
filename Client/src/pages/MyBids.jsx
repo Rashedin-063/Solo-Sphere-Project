@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import useAuth from '../hooks/useAuth';
 import axios from 'axios';
+import { toast } from 'react-toastify';
 
 const MyBids = () => {
   const { user } = useAuth();
@@ -8,27 +9,41 @@ const MyBids = () => {
   const [bids, setBids] = useState([]);
 
   useEffect(() => {
-    const getData = async () => {
-      try {
-        const { data } = await axios.get(
-          `${import.meta.env.VITE_API_URL}/my-bids/${user?.email}`
-        );
-        setBids(data)
-      } catch (error) {
-        console.log('error fetching data', error)
-        
-      }
-    }
-
-  //   if (user?.email) {
-  //     getData();
-    // }
-     if (user?.email) {
+if (user?.email) {
        getData();
      }
-  }, [user?.email]);
+  }, []);
 
-  console.log(bids)
+   const getData = async () => {
+     try {
+       const { data } = await axios.get(
+         `${import.meta.env.VITE_API_URL}/my-bids/${user?.email}`
+       );
+       setBids(data);
+     } catch (error) {
+       console.log('error fetching data', error);
+     }
+   };
+
+
+  const handleStatus = async (id, status) => {
+
+  try {
+      const { data } = await axios.patch(
+        `${import.meta.env.VITE_API_URL}/bid/${id}`, {status} 
+      );
+
+      console.log(data)
+      if (data.modifiedCount > 0) {
+        toast.success('Your Status is updated successfully');
+        getData()
+      }
+    
+    } catch (error) {
+      console.log('Error fetching data', error)
+      
+    }
+}
   
 
   return (
@@ -36,8 +51,8 @@ const MyBids = () => {
       <div className='flex items-center gap-x-3'>
         <h2 className='text-lg font-medium text-gray-800 '>My Bids</h2>
 
-        <span className='px-3 py-1 text-xs text-blue-600 bg-blue-100 rounded-full '>
-          {bids.length}
+        <span className='px-3 py-1 text-xs text-blue-600 bg-blue-100 rounded-full font-semibold'>
+          {bids.length} <span className='pl-1 font-normal'>{bids.length < 2 ? 'Bid' : 'Bids' }</span>
         </span>
       </div>
 
@@ -157,7 +172,7 @@ const MyBids = () => {
                         {/* Complete Button */}
                         <button
                          disabled={bid.status !== 'In Progress'}
-                          // onClick={() => handleStatus(bid._id, 'Complete')}
+                          onClick={() => handleStatus(bid._id, 'Complete')}
                           title='Mark Complete'
                           className='text-gray-500 transition-colors duration-200   hover:text-red-500 focus:outline-none disabled:cursor-not-allowed'
                         >

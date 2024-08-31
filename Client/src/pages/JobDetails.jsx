@@ -1,4 +1,4 @@
-import { useLoaderData } from "react-router-dom"
+import { useLoaderData, useNavigate } from "react-router-dom"
 import useAuth from "../hooks/useAuth";
 import DatePicker from 'react-datepicker';
 
@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 
 
 const JobDetails = () => {
+  const navigate = useNavigate();
   const job = useLoaderData();
   const { user } = useAuth();
   const [startDate, setStartDate] = useState(new Date());
@@ -54,6 +55,7 @@ try {
   if (data.insertedId) {
     toast.success('Your bid is placed successfully')
     form.reset()
+    navigate('/myBids')
   }  
 } catch (error) {
   console.log(error.message)

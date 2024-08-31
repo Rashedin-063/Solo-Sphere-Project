@@ -5,10 +5,6 @@ import TabCategories from './TabCAtegories';
 
 const Home = () => {
   const jobs = useLoaderData();
-
-  console.log(jobs)
-  
-
   return (
     <div>
       <Carousel />

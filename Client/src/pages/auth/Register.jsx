@@ -3,6 +3,7 @@ import useAuth from '../../hooks/useAuth';
 import { toast } from 'react-toastify'
 import logo from '../../assets/images/logo.png';
 import bgImg from '../../assets/images/register.jpg'
+import axios from 'axios';
 
 const Register = () => {
    const location = useLocation();
@@ -12,18 +13,25 @@ const Register = () => {
   
   const { signInWithGoogle, createUser, updateUserProfile } = useAuth();
 
-  const handleGoogleLogin = async() => {
+ const handleGoogleLogin = async () => {
    try {
-    await signInWithGoogle()
-      .then(result => {
-        console.log(result.user);
-        toast.success('Your google login is successful')
-           navigate(from, { replace: true });
-      })
+     const result = await signInWithGoogle();
+     console.log(result?.user);
+
+    //  const { data } = await axios.post(
+    //    `${import.meta.env.VITE_API_URL}/jwt`,
+    //    { email: result?.user },
+    //    { withCredentials: true }
+    //  );
+
+    //  console.log(data);
+
+     toast.success('Your google login is successful');
+     navigate(from, { replace: true });
    } catch (error) {
-    console.log(error.message)
+     console.log(error.message);
    }
-  }
+ };
   
    const handleSignUp = async (e) => {
      e.preventDefault();
@@ -37,19 +45,21 @@ const Register = () => {
      console.log(name, photo,email, password);
 
   try {
-       await createUser(email, password)
-       .then((result) => {
-         console.log(result.user);
-         updateUserProfile(name, photo)
-           .then(() => {
-           console.log('profile updated')
-           })
-         .catch(error => console.log(error.message)
-         )
+     const result =  await createUser(email, password)
+    await updateUserProfile(name, photo)
+
+// const { data } = await axios.post(
+//   `${import.meta.env.VITE_API_URL}/jwt`,
+//   { email: result?.user },
+//   { withCredentials: true }
+// );
+
+// console.log(data);
+
+
          toast.success('Registration successful')
             navigate(from, { replace: true });
 
-       })
   } catch (error) {
     console.log(error.message)
   }

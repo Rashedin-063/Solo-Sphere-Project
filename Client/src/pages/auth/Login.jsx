@@ -3,6 +3,7 @@ import login from '../../assets/images/login.jpg'
 import logo from '../../assets/images/logo.png';
 import useAuth from "../../hooks/useAuth";
 import { toast } from 'react-toastify';
+import axios from "axios";
 
 const Login = () => {
   const location = useLocation();
@@ -15,12 +16,20 @@ const Login = () => {
 
   const handleGoogleLogin = async() => {
     try {
-      await signInWithGoogle()
-        .then((result) => {
-          console.log(result.user);
-          toast.success('Your google login is successful');
-          navigate(from, {replace: true})
-        })
+      const result = await signInWithGoogle()
+      console.log(result?.user)
+      
+      
+      // const { data } = await axios.post(
+      //   `${import.meta.env.VITE_API_URL}/jwt`, {email: result?.user}, {withCredentials: true}
+      // );
+
+      // console.log(data)
+      
+       
+       toast.success('Your google login is successful');
+       navigate(from, { replace: true });
+      
     } catch (error) {
       console.log(error.message)
     }
@@ -36,23 +45,30 @@ const Login = () => {
     console.log(email, password)
     
     try {
-      await signIn(email, password)
-      .then(result => {
-        console.log(result.user)
-        toast.success('Login successful')
-        navigate(from, { replace: true });
-      })
+      const result = await signIn(email, password)
+      
+      //  const { data } = await axios.post(
+      //    `${import.meta.env.VITE_API_URL}/jwt`,
+      //    { email: result?.user },
+      //    { withCredentials: true }
+      //  );
+
+      //  console.log(data);
+      
+
+      toast.success('Login successful');
+      navigate(from, { replace: true });
     } catch (error) {
       console.log(error.message)
     }
   
   }
 
-  if (user) {
-    navigate('/')
-  }
+  // if (user) {
+  //   navigate('/')
+  // }
 
-  if (loading) return;
+  // if (loading) return;
 
   return (
     <div className='flex justify-center items-center mt-8 mb-4'>

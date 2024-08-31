@@ -41,7 +41,6 @@ const AuthProvider = ({ children }) => {
     // const { data } = await axios(`${import.meta.env.VITE_API_URL}/logout`, {
     //   withCredentials: true,
     // });
-    // console.log(data);
     return signOut(auth);
   };
 
@@ -55,12 +54,39 @@ const AuthProvider = ({ children }) => {
   // onAuthStateChange
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+       const userEmail = currentUser?.email || user?.email;
+       const loggedUser = { email: userEmail };
+
       setUser(currentUser);
       console.log('CurrentUser-->', currentUser);
       setLoading(false);
+
+      if (currentUser) {
+  try {
+    axios.post(
+         `${import.meta.env.VITE_API_URL}/jwt`,
+         loggedUser,
+         { withCredentials: true })
+  } catch (error) {
+    console.log('Error', error)
+    
+  }
+      } else {
+     try {
+         axios(`${import.meta.env.VITE_API_URL}/logout`, {
+           withCredentials: true,
+         })
+      ;
+     } catch (error) {
+      console.log('Error fetching data', error)
+      
+     }   
+}
+
     });
+
     return () => {
-      return unsubscribe();
+      unsubscribe();
     };
   }, []);
 

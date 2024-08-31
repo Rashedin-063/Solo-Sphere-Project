@@ -1,33 +1,86 @@
 import { useEffect, useState } from "react";
-import useAuth from "../hooks/useAuth";
-import axios from "axios";
+import { toast } from "react-toastify";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import useAxiosSecure from './../hooks/useAxiosSecure';
+import useAuth from './../hooks/useAuth';
 
 
 const BidRequests = () => {
 
- const { user } = useAuth();
+  const { user } = useAuth();
+  const axiosSecure = useAxiosSecure();
+  const queryClient = useQueryClient()
 
- const [bids, setBids] = useState([]);
+  const getData = async () => {
+    const { data } = await axiosSecure.get(`/bid-request/${user?.email}`);
 
- useEffect(() => {
-   const getData = async () => {
-     try {
-       const { data } = await axios.get(
-         `${import.meta.env.VITE_API_URL}/bid-request/${user?.email}`
-       );
-       setBids(data);
-     } catch (error) {
-       console.log('error fetching data', error);
-     }
-   };
+    return data;
+  };
+  
+  // const {data : bids = [], isLoading, refetch, isError, error} =  useQuery({
+  //   queryKey: ['bids', user?.email],
+  //   queryFn: getData
+  // })
+  const {data : bids = [], isLoading, refetch, isError, error} =  useQuery({
+    queryKey: ['bids', user?.email],
+    queryFn: async () => {
+       const { data } = await axiosSecure.get(`/bid-request/${user?.email}`);
+
+       return data;
+    }
+  })
+  
+
+//  const [bids, setBids] = useState([]);
+
+  // get user data using axios
+//   useEffect(() => {
+// try {
+//   const getData = async () => {
+//     const { data } = await axiosSecure.get(`/bid-request/${user?.email}`);
+
+//     setBids(data);
+//   };
+// } catch (error) {
+//   console.log('error fetching data', error)
+  
+// }
+//     getData()
+//   },[user?.email])
 
   
-   if (user?.email) {
-     getData();
-   }
- }, [user?.email]);
 
- console.log(bids);
+ const {mutateAsync} = useMutation({
+    mutationFn: async ({id, currStatus}) => {
+       const { data } = await axiosSecure.patch(
+        `/bid/${id}`, {status: currStatus}
+       );
+     console.log(data)
+     return data;
+     
+   },
+   onSuccess: () => {
+     toast.success('Your Status is updated successfully');
+     // refresh ui for latest data
+     //  refetch()
+     
+     // hard way
+     queryClient.invalidateQueries({queryKey: ['bids']})
+   }
+})
+  
+   
+
+  const handleStatus = async (id, prevStatus, currStatus) => {
+    if (prevStatus === currStatus) {
+      console.log('oops')
+      return;
+    }  
+await mutateAsync({id, currStatus})
+ }
+  
+  
+  if (isLoading) return <p>data is still loading</p>
   
 
   return (
@@ -166,9 +219,8 @@ const BidRequests = () => {
                         <div className='flex items-center gap-x-6'>
                           {/* Accept Button: In Progress */}
                           <button
-                            // onClick={() =>
-                            //   handleStatus(bid._id, bid.status, 'In Progress')
-                            // }
+
+                            onClick={() => handleStatus(bid._id, bid.status, 'In Progress')}
                             disabled={bid.status === 'Complete'}
                             className='disabled:cursor-not-allowed text-gray-500 transition-colors duration-200   hover:text-red-500 focus:outline-none'
                           >
@@ -189,9 +241,9 @@ const BidRequests = () => {
                           </button>
                           {/* Reject Button */}
                           <button
-                            // onClick={() =>
-                            //   handleStatus(bid._id, bid.status, 'Rejected')
-                            // }
+                            onClick={() => {
+                              handleStatus(bid._id, bid.status, 'Rejected')
+                            }}
                             disabled={bid.status === 'Complete'}
                             className='disabled:cursor-not-allowed text-gray-500 transition-colors duration-200   hover:text-yellow-500 focus:outline-none'
                           >

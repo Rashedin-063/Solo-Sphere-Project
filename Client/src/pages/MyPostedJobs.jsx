@@ -3,20 +3,24 @@ import useAuth from "../hooks/useAuth"
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import useAxiosSecure from "../hooks/useAxiosSecure";
 
 
 const MyPostedJobs = () => {
 
   const { user } = useAuth();
   
-  const [jobs, setJobs ] = useState([]);
+  const [jobs, setJobs] = useState([]);
+
+   const axiosSecure = useAxiosSecure();
 
   useEffect(() => {
     const getData = async () => {
       try {
-        const { data } = await axios.get(
-          `${import.meta.env.VITE_API_URL}/jobs/${user?.email}`
+        const { data } = await axiosSecure.get(
+          `/jobs/${user?.email}`
         );
+
         setJobs(data);
       } catch (error) {
         console.error('Error fetching jobs:', error);
@@ -30,10 +34,9 @@ const MyPostedJobs = () => {
 
   
   const handleDelete = async (id) => {
- 
     try {
-      const { data } = await axios.delete(
-        `${import.meta.env.VITE_API_URL}/job/${id}`)
+      const { data } = await axiosSecure.delete(
+        `/job/${id}`)
 
         if (data.deletedCount > 0) {
           toast.success('Job deleted successfully')

@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 
 const port = process.env.PORT || 5000;
 const app = express();
@@ -15,9 +17,28 @@ const corsOption = {
 // middleware
 app.use(cors(corsOption));
 app.use(express.json());
+app.use(cookieParser())
 
+// custom middleware
+const verifyToken = (req, res, next) => {
+  const token = req.cookies?.token;
 
+   if (!token) return res.status(401).send({ message: 'Unauthorized' });
 
+   jwt.verify(token, process.env.ACCESS_TOKEN, (error, decoded) => {
+     if (error) {
+       console.log(error)
+       
+       return res.status(401).send({ message: 'Unauthorized access' });
+     }
+     req.user = decoded.email;
+     
+     console.log(decoded.email)
+     
+     return next();
+   });
+ 
+}
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.4qgkjzt.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
   
@@ -39,6 +60,34 @@ async function run() {
     const jobCollection = client.db('soloSphereDB').collection('jobs');
     const bidCollection = client.db('soloSphereDB').collection('bids');
 
+    // auth related api
+    app.post('/jwt', async (req, res) => {
+      const loggedUser = req.body
+console.log(loggedUser)
+
+      const token = jwt.sign(loggedUser, process.env.ACCESS_TOKEN, {
+       expiresIn: '7d'
+})
+
+      res
+        .cookie('token', token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+        })
+        .send({success: true});
+    })
+
+    // clear token on logout
+    app.get('/logout', (req, res) => {
+    
+      res
+        .clearCookie('token', {
+         maxAge: 0
+        })
+        .send({ success: true });
+    })
+
 
     // job related api
     app.get('/jobs', async (req, res) => {
@@ -47,7 +96,7 @@ async function run() {
      res.send(result)
     })
 
-    app.get('/job/:id', async(req, res) => {
+    app.get('/job/:id', verifyToken, async(req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
 
@@ -55,8 +104,17 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/jobs/:email', async (req, res) => {
+    app.get('/jobs/:email', verifyToken, async (req, res) => {
+    
+      const tokenEmail = req.user
+
       const email = req.params.email;
+
+      if (tokenEmail !== email) {
+        return res.status(403).send({message: 'Forbidden Access'})
+      }
+
+      
       const query = {'buyer.email': email}
 
       const result = await jobCollection.find(query).toArray();
@@ -101,7 +159,7 @@ async function run() {
     }) 
 
     // bids related api
-    app.get('/my-bids/:email', async (req, res) => {
+    app.get('/my-bids/:email', verifyToken, async (req, res) => {
       const email = req.params.email;
       const query = { email };
       const result = await bidCollection.find(query).toArray();
@@ -109,7 +167,7 @@ async function run() {
       res.send(result)
     })
     
-    app.get('/bid-request/:email', async (req, res) => {
+    app.get('/bid-request/:email', verifyToken, async (req, res) => {
       const email = req.params.email;
       const query = { buyer_email: email };
 
@@ -122,6 +180,26 @@ async function run() {
       const bidData = req.body;
 
       const result = await bidCollection.insertOne(bidData);
+
+      res.send(result)
+    })
+
+    // update bid request
+    app.patch('/bid/:id', async (req, res) => {
+      const id = req.params.id;
+
+      const status = req.body;
+
+      console.log(status)
+      
+
+      const query = { _id: new ObjectId(id) }
+      
+      const updatedDoc = {
+        $set: status
+      }
+
+      const result = await bidCollection.updateOne(query, updatedDoc);
 
       res.send(result)
     })

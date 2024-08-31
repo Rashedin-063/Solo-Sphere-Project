@@ -36,8 +36,8 @@ const router = createBrowserRouter([
       {
         path: '/job/:id',
         element: <JobDetails />,
-        loader: async({ params }) =>
-         await fetch(`${import.meta.env.VITE_API_URL}/job/${params.id}`),
+        loader: async ({ params }) =>
+          await fetch(`${import.meta.env.VITE_API_URL}/job/${params.id}`),
       },
       {
         path: '/update/:id',
@@ -69,22 +69,23 @@ const router = createBrowserRouter([
         path: '/myBids',
         element: (
           <PrivateRoute>
-            <MyBids/>
+            <MyBids />
           </PrivateRoute>
-        )
+        ),
       },
       {
         path: '/bid-request',
         element: (
           <PrivateRoute>
-           <BidRequests/>
+            <BidRequests />
           </PrivateRoute>
-        )
+        ),
       },
       {
         path: '/jobs',
-        element: <AllJobs/>
-      }
+        element: <AllJobs />,
+        loader: () => fetch(`${import.meta.env.VITE_API_URL}/jobCount`),
+      },
     ],
   },
 ]);

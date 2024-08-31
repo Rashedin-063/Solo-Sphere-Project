@@ -6,11 +6,33 @@ import useAuth from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const AddJob = () => {
   const [startDate, setStartDate] = useState(new Date());
   const { user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  const { mutateAsync} = useMutation({
+    mutationFn: async (jobData) => {
+        const { data } = await axios.post(
+          `${import.meta.env.VITE_API_URL}/jobs`,
+          jobData
+      );
+      return data
+    },
+    onSuccess: (data) => {
+      if (data.insertedId) {
+        toast.success('Your job is posted successfully');
+      }
+    },
+    onError: (error) => {
+     console.log(error.message)
+     toast.error(error.message)
+      
+    }
+  })
 
   const handleAddJob = async (e) => {
     e.preventDefault();
@@ -38,19 +60,27 @@ const AddJob = () => {
       }
     };
 
- try {
-   const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/jobs`, jobData);
+  try {
+    await mutateAsync(jobData);
+    form.reset()
+  } catch (error) {
+    console.log(error)
+    
+  }
 
-  //  console.log(data)
+//  try {
+//    const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/jobs`, jobData);
+
+//   //  console.log(data)
    
-    if (data.insertedId) {
-      toast.success('Your job is posted successfully');
-      form.reset();
-    }  
- } catch (error) {
-  console.log(error.message)
+//     if (data.insertedId) {
+//       toast.success('Your job is posted successfully');
+//       form.reset();
+//     }  
+//  } catch (error) {
+//   console.log(error.message)
   
- }
+//  }
     
   };
 

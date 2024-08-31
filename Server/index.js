@@ -62,70 +62,97 @@ async function run() {
 
     // auth related api
     app.post('/jwt', async (req, res) => {
-      const loggedUser = req.body
-console.log(loggedUser)
+      const loggedUser = req.body;
 
       const token = jwt.sign(loggedUser, process.env.ACCESS_TOKEN, {
-       expiresIn: '7d'
-})
+        expiresIn: '7d',
+      });
 
       res
         .cookie('token', token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
-          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
         })
-        .send({success: true});
-    })
+        .send({ success: true });
+    });
 
     // clear token on logout
     app.get('/logout', (req, res) => {
-    
       res
         .clearCookie('token', {
-         maxAge: 0
+          maxAge: 0,
         })
         .send({ success: true });
-    })
-
+    });
 
     // job related api
     app.get('/jobs', async (req, res) => {
-      
       const result = await jobCollection.find().toArray();
-     res.send(result)
-    })
+      res.send(result);
+    });
 
-    app.get('/job/:id', async(req, res) => {
+    app.get('/job/:id', async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
 
       const result = await jobCollection.findOne(query);
-      res.send(result)
+      res.send(result);
+    });
+
+    app.get('/all-jobs', async (req, res) => {
+      const size = parseInt(req.query.size);
+      const page = parseInt(req.query.page);
+      const filter = req.query.filter;
+
+      let query = {};
+
+      if(filter) query ={ category: filter}
+
+      const result = await jobCollection
+        .find(query)
+        .skip((page-1)*size)
+        .limit(size)
+        .toArray();
+        res.send(result);
+      });
+
+    app.get('/jobCount', async (req, res) => {
+      const filter = req.query.filter;
+  
+      let query = {};
+
+      if (filter) query = { category: filter };
+      
+     try {
+       const count = await jobCollection.estimatedDocumentCount();
+    
+       res.send({ count });
+     } catch (error) {
+       console.error('Error fetching job count:', error);
+       res.status(500).send({ error: 'Failed to fetch job count' });
+     }
     })
 
     app.get('/jobs/:email', verifyToken, async (req, res) => {
-    
-      const tokenEmail = req.user
+      const tokenEmail = req.user;
 
       const email = req.params.email;
 
       if (tokenEmail !== email) {
-        return res.status(403).send({message: 'Forbidden Access'})
+        return res.status(403).send({ message: 'Forbidden Access' });
       }
 
-      
-      const query = {'buyer.email': email}
+      const query = { 'buyer.email': email };
 
       const result = await jobCollection.find(query).toArray();
-      res.send(result)
-    })
+      res.send(result);
+    });
 
     app.post('/jobs', async (req, res) => {
       const jobData = req.body;
 
-      console.log(jobData)
-      
+      console.log(jobData);
 
       const result = await jobCollection.insertOne(jobData);
 
@@ -135,67 +162,69 @@ console.log(loggedUser)
     app.put('/job/:id', async (req, res) => {
       const id = req.params.id;
       const jobData = req.body;
-      const query = { _id: new ObjectId(id) }
+      const query = { _id: new ObjectId(id) };
       const options = { upsert: true };
 
       const updatedDoc = {
         $set: {
-          ...jobData
-        }
-      }
+          ...jobData,
+        },
+      };
 
-      const result = await jobCollection.updateOne(query, updatedDoc, options)
+      const result = await jobCollection.updateOne(query, updatedDoc, options);
 
-      res.send(result)
-    })
+      res.send(result);
+    });
 
     app.delete('/job/:id', async (req, res) => {
       const id = req.params.id;
-      
+
       const query = { _id: new ObjectId(id) };
 
-      const result = await jobCollection.deleteOne(query)
-      res.send(result)
-    }) 
+      const result = await jobCollection.deleteOne(query);
+      res.send(result);
+    });
 
     // bids related api
-    // add verifyToken
-    app.get('/my-bids/:email', verifyToken,  async (req, res) => {
+
+    // get all my-bids data filtering email
+    app.get('/my-bids/:email', verifyToken, async (req, res) => {
       const email = req.params.email;
       const query = { email };
       const result = await bidCollection.find(query).toArray();
 
-      res.send(result)
-    })
-    
+      res.send(result);
+    });
+
+    // get all my-bids data filtering email
+
     app.get('/bid-request/:email', verifyToken, async (req, res) => {
       const email = req.params.email;
       const query = { buyer_email: email };
 
       const result = await bidCollection.find(query).toArray();
 
-      res.send(result)
-})
+      res.send(result);
+    });
 
     app.post('/bids', async (req, res) => {
       const bidData = req.body;
-  
+
       //check if it's a duplicate request
       const query = {
         email: bidData.email,
         jobId: bidData.jobId,
       };
-      const alreadyApplied = await bidCollection.findOne(query)
-      
+      const alreadyApplied = await bidCollection.findOne(query);
+
       if (alreadyApplied) {
-        return res.status(400).send({message: 'The bid is already placed'})
+        return res.status(400).send({ message: 'The bid is already placed' });
       }
 
       const result = await bidCollection.insertOne(bidData);
 
       res.send(result);
-     
-    })
+    });
 
     // update bid request
     app.patch('/bid/:id', async (req, res) => {
@@ -203,20 +232,16 @@ console.log(loggedUser)
 
       const status = req.body;
 
-      console.log(status)
-      
+      const query = { _id: new ObjectId(id) };
 
-      const query = { _id: new ObjectId(id) }
-      
       const updatedDoc = {
-        $set: status
-      }
+        $set: status,
+      };
 
       const result = await bidCollection.updateOne(query, updatedDoc);
 
-      res.send(result)
-    })
-
+      res.send(result);
+    });
 
     // Send a ping to confirm a successful connection
     await client.db('admin').command({ ping: 1 });

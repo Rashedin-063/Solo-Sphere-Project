@@ -1,30 +1,86 @@
 import { useQuery } from '@tanstack/react-query';
 import JobCard from '../components/JobCard';
 import axios from 'axios';
+import { useLoaderData } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 
 const AllJobs = () => {
-  const pages = [1, 2, 3, 4, 5];
+  const [jobs, setJobs] = useState([])
+  const [itemsPerPage, setItemsPerPage] = useState(3);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filter, setFilter] = useState('')
+  const [count, setCount] = useState(0)
 
-  const { data: jobs, isLoading, isError, error } = useQuery({
-    queryKey: ['bids'],
-    queryFn: async () => {
-      const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/jobs`);
-      return data;
-    },
-    onError: (err) => {
-      console.error('Error fetching jobs:', err);
-    },
-  });
+//   const { data: jobs, isLoading, isError, error } = useQuery({
+//     queryKey: ['bids', currentPage, itemsPerPage, filter],
+//     queryFn: async () => {
+//       const { data } = await axios.get(`${import.meta.env.VITE_API_URL}/all-jobs?page=${currentPage}&size=${itemsPerPage}&filter=${filter}`);
+//       return data;
+//     },
+// onError: (err) => {
+//       console.error('Error fetching jobs:', err);
+//     },
+//   });
 
-  if (isLoading) {
-    return <div className='flex items-center justify-center min-h-screen text-red-400'>Loading...</div>;
+   useEffect(() => {
+     const getData = async () => {
+       const { data } = await axios(
+         `${
+           import.meta.env.VITE_API_URL
+         }/all-jobs?page=${currentPage}&size=${itemsPerPage}&filter=${filter}`
+       );
+       setJobs(data);
+     };
+     getData();
+   }, [currentPage, filter, itemsPerPage,]);
+
+   useEffect(() => {
+     const getCount = async () => {
+       const { data } = await axios(
+         `${
+           import.meta.env.VITE_API_URL
+         }/jobCount?filter=${filter}`
+       );
+
+       setCount(data.count);
+     };
+     getCount();
+   }, [filter]);
+
+ 
+
+  
+  const jobsPerPage = Math.ceil(count / itemsPerPage);
+
+  const pages = [...Array(jobsPerPage).keys()].map((ell) => ell + 1);
+
+   const handleCurrentPage = (value) => {
+     setCurrentPage(value);
+   };
+
+  const handlePrevBtn = () => {
+  
+    if (currentPage > 1) {
+       setCurrentPage(currentPage - 1);
+    } 
+    if (currentPage === 1) {
+      disabled
+    }
   }
-
-  if (isError) {
-    return <div className='flex items-center justify-center min-h-screen text-red-600'>Error: {error.message}</div>;
+  const handleNextBtn = () => {
+    if (currentPage < pages.length) {
+      setCurrentPage(currentPage + 1)
+    }
   }
+  
 
-  console.log(jobs)
+  // if (isLoading) {
+  //   return <div className='flex items-center justify-center min-h-screen text-red-400'>Loading...</div>;
+  // }
+
+  // if (isError) {
+  //   return <div className='flex items-center justify-center min-h-screen text-red-600'>Error: {error.message}</div>;
+  // }
   
 
   return (
@@ -33,6 +89,8 @@ const AllJobs = () => {
         <div className='flex flex-col md:flex-row justify-center items-center gap-5 '>
           <div>
             <select
+              onChange={(e) => setFilter(e.target.value)}
+              value={filter}
               name='category'
               id='category'
               className='border p-4 rounded-lg'
@@ -72,15 +130,21 @@ const AllJobs = () => {
           </div>
           <button className='btn'>Reset</button>
         </div>
+        {/* mapping the all jobs data */}
         <div className='grid grid-cols-1 gap-8 mt-8 xl:mt-16 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
-          {jobs?.map(job => (
+          {jobs?.map((job) => (
             <JobCard key={job._id} job={job} />
           ))}
         </div>
       </div>
-
+      {/* pagination section */}
       <div className='flex justify-center mt-12'>
-        <button className='px-4 py-2 mx-1 text-gray-700 disabled:text-gray-500 capitalize bg-gray-200 rounded-md disabled:cursor-not-allowed disabled:hover:bg-gray-200 disabled:hover:text-gray-500 hover:bg-blue-500  hover:text-white'>
+        {/* previous btn */}
+        <button
+          onClick={handlePrevBtn}
+          disabled={currentPage === 1}
+          className={`px-4 py-2 mx-1 text-gray-700 disabled:text-gray-500 capitalize bg-gray-200 rounded-md disabled:cursor-not-allowed disabled:hover:bg-gray-200 disabled:hover:text-gray-500 hover:bg-blue-500  hover:text-white`}
+        >
           <div className='flex items-center -mx-1'>
             <svg
               xmlns='http://www.w3.org/2000/svg'
@@ -101,16 +165,25 @@ const AllJobs = () => {
           </div>
         </button>
 
+        {/* dynamic btn */}
         {pages.map((btnNum) => (
           <button
             key={btnNum}
-            className={`hidden px-4 py-2 mx-1 transition-colors duration-300 transform  rounded-md sm:inline hover:bg-blue-500  hover:text-white`}
+            onClick={() => handleCurrentPage(btnNum)}
+            className={`hidde px-4 py-2 mx-1 transition-colors duration-300 transform  rounded-md sm:inline hover:bg-blue-800  hover:text-white ${
+              currentPage === btnNum ? 'bg-blue-600 text-white' : ''
+            } `}
           >
             {btnNum}
           </button>
         ))}
 
-        <button className='px-4 py-2 mx-1 text-gray-700 transition-colors duration-300 transform bg-gray-200 rounded-md hover:bg-blue-500 disabled:hover:bg-gray-200 disabled:hover:text-gray-500 hover:text-white disabled:cursor-not-allowed disabled:text-gray-500'>
+        {/* next btn */}
+        <button
+          onClick={handleNextBtn}
+          disabled={currentPage === pages.length}
+          className='px-4 py-2 mx-1 text-gray-700 transition-colors duration-300 transform bg-gray-200 rounded-md hover:bg-blue-500 disabled:hover:bg-gray-200 disabled:hover:text-gray-500 hover:text-white disabled:cursor-not-allowed disabled:text-gray-500'
+        >
           <div className='flex items-center -mx-1'>
             <span className='mx-1'>Next</span>
 

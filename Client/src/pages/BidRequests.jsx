@@ -23,7 +23,7 @@ const BidRequests = () => {
   // })
   const {
     data: bids = [],
-    isLoading
+    isLoading, isError, error
   } = useQuery({
     queryKey: ['bids', user?.email],
     queryFn: async () => {
@@ -91,7 +91,21 @@ await mutateAsync({id, currStatus})
  }
   
   
-  if (isLoading) return <p>data is still loading</p>
+ if (isLoading) {
+   return (
+     <div className='flex items-center justify-center min-h-screen text-red-400'>
+       Loading...
+     </div>
+   );
+ }
+
+ if (isError) {
+   return (
+     <div className='flex items-center justify-center min-h-screen text-red-600'>
+       Error: {error.message}
+     </div>
+   );
+ }
   
 
   return (

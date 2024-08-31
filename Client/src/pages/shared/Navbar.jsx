@@ -15,8 +15,11 @@ const Navbar = () => {
       </div>
       <div className='flex-none'>
         <ul className='menu menu-horizontal px-1'>
-          <li>
+          <li className='ml-8 md:ml-0'>
             <Link to='/'>Home</Link>
+          </li>
+          <li className='-mx-4 md:-mx-0'>
+            <Link to='/jobs'>All Jobs</Link>
           </li>
 
           {!user && (

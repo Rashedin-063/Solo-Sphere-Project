@@ -18,7 +18,7 @@ const MyBids = () => {
 //      }
 //   }, []);
 
-  const { data: bids, isLoading } = useQuery({
+  const { data: bids, isLoading, isError, error } = useQuery({
     queryKey: ['bids', user?.email],
     queryFn: async() => {
       const { data } = await axiosSecure.get(
@@ -64,7 +64,21 @@ const MyBids = () => {
   const handleStatus = async (id, status) => {
     await mutateAsync({id, status})
 }
- if(isLoading) return <p>Data is Loading</p> 
+ if (isLoading) {
+   return (
+     <div className='flex items-center justify-center min-h-screen text-red-400'>
+       Loading...
+     </div>
+   );
+ }
+
+ if (isError) {
+   return (
+     <div className='flex items-center justify-center min-h-screen text-red-600'>
+       Error: {error.message}
+     </div>
+   );
+ }
 
   return (
     <section className='container px-4 mx-auto pt-12'>

@@ -16,7 +16,7 @@ const MyPostedJobs = () => {
   const axiosSecure = useAxiosSecure();
   const queryClient = useQueryClient()
   
- const {data: jobs, } = useQuery({
+ const {data: jobs, isLoading, isError, error } = useQuery({
    queryKey: ['jobs', user?.email],
    queryFn: async () => {
      const { data } = await axiosSecure.get(
@@ -103,7 +103,21 @@ const MyPostedJobs = () => {
     // }
     await mutateAsync({id})
 }
-  
+   if (isLoading) {
+     return (
+       <div className='flex items-center justify-center min-h-screen text-red-400'>
+         Loading...
+       </div>
+     );
+   }
+
+   if (isError) {
+     return (
+       <div className='flex items-center justify-center min-h-screen text-red-600'>
+         Error: {error.message}
+       </div>
+     );
+   }
 
   return (
     <section className='container px-4 mx-auto pt-12'>

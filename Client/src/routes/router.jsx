@@ -35,8 +35,8 @@ const router = createBrowserRouter([
       {
         path: '/job/:id',
         element: <JobDetails />,
-        loader: ({ params }) =>
-          fetch(`${import.meta.env.VITE_API_URL}/job/${params.id}`),
+        loader: async({ params }) =>
+         await fetch(`${import.meta.env.VITE_API_URL}/job/${params.id}`),
       },
       {
         path: '/update/:id',

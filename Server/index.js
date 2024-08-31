@@ -96,7 +96,7 @@ console.log(loggedUser)
      res.send(result)
     })
 
-    app.get('/job/:id', verifyToken, async(req, res) => {
+    app.get('/job/:id', async(req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
 

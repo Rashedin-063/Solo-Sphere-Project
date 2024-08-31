@@ -11,24 +11,35 @@ const BidRequests = () => {
   const axiosSecure = useAxiosSecure();
   const queryClient = useQueryClient()
 
-  const getData = async () => {
-    const { data } = await axiosSecure.get(`/bid-request/${user?.email}`);
+  // const getData = async () => {
+  //   const { data } = await axiosSecure.get(`/bid-request/${user?.email}`);
 
-    return data;
-  };
+  //   return data;
+  // };
   
   // const {data : bids = [], isLoading, refetch, isError, error} =  useQuery({
   //   queryKey: ['bids', user?.email],
   //   queryFn: getData
   // })
-  const {data : bids = [], isLoading, refetch, isError, error} =  useQuery({
+  const {
+    data: bids = [],
+    isLoading
+  } = useQuery({
     queryKey: ['bids', user?.email],
     queryFn: async () => {
-       const { data } = await axiosSecure.get(`/bid-request/${user?.email}`);
+      const { data } = await axiosSecure.get(`/bid-request/${user?.email}`);
 
-       return data;
-    }
-  })
+      return data;
+    },
+    onSuccess: (data) => {
+      console.log('Data fetched successfully:', data);
+      // You can perform any additional actions here, like updating the state or triggering side effects
+      toast.success('Bids data fetched successfully!');
+    },
+    onError: (error) => {
+      console.log('Error fetching data:', error);
+    },
+  });
   
 
 //  const [bids, setBids] = useState([]);

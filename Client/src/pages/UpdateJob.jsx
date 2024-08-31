@@ -6,14 +6,17 @@ import 'react-datepicker/dist/react-datepicker.css';
 import { toast } from 'react-toastify';
 import useAuth from '../hooks/useAuth';
 import axios from 'axios';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import useAxiosSecure from '../hooks/useAxiosSecure';
 
 const UpdateJob = () => {
-  const [startDate, setStartDate] = useState(new Date());
+   
   const navigate = useNavigate();
   const { user } = useAuth();
-
   const job = useLoaderData();
-  console.log(job);
+  const axiosSecure = useAxiosSecure()
+  const queryClient = useQueryClient();
+  
   const {
     _id,
     job_title,
@@ -24,6 +27,33 @@ const UpdateJob = () => {
     min_price,
     buyer,
   } = job;
+
+   const [startDate, setStartDate] = useState(
+     deadline ? new Date(deadline) : new Date()
+   );
+
+  // update data using tanstack query
+  const { mutateAsync } = useMutation({
+    mutationFn: async ({ jobData, id }) => {
+  
+      const { data } = await axiosSecure.put(`/job/${_id}`, jobData);
+      return data;
+    },
+      onSuccess: (data) => {
+        if (data.modifiedCount > 0) {
+          toast.success('Job data updated successfully');
+
+          // refetching UI
+          queryClient.invalidateQueries(['job']);
+
+          navigate('/myPostedJobs');
+        }
+      },
+      onError: (error) => {
+        toast.error(error.message);
+      },   
+  }
+)
 
   const handleUpdateForm = async (e) => {
     e.preventDefault();
@@ -51,19 +81,21 @@ const UpdateJob = () => {
       },
     };
 
-    try {
-      const { data } = await axios.put(
-        `${import.meta.env.VITE_API_URL}/job/${_id}`,
-        jobData
-      );
+    await mutateAsync({jobData})
 
-      if (data.modifiedCount > 0) {
-        toast.success('Job data updated successfully');
-        navigate('/myPostedJobs')
-      }
-    } catch (error) {
-      toast.error(error.message);
-    }
+    // try {
+    //   const { data } = await axios.put(
+    //     `${import.meta.env.VITE_API_URL}/job/${_id}`,
+    //     jobData
+    //   );
+
+    //   if (data.modifiedCount > 0) {
+    //     toast.success('Job data updated successfully');
+    //     navigate('/myPostedJobs')
+    //   }
+    // } catch (error) {
+    //   toast.error(error.message);
+    // }
   };
 
   return (
@@ -109,7 +141,7 @@ const UpdateJob = () => {
               {/* {new Date(deadline).toLocaleDateString()} */}
               <DatePicker
                 className='border p-2 rounded-md'
-                selected={new Date(deadline)}
+                selected={startDate}
                 onChange={(date) => setStartDate(date)}
               />
             </div>

@@ -4,49 +4,104 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import useAxiosSecure from "../hooks/useAxiosSecure";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 
 const MyPostedJobs = () => {
 
   const { user } = useAuth();
   
-  const [jobs, setJobs] = useState([]);
+  // const [jobs, setJobs] = useState([]);
 
-   const axiosSecure = useAxiosSecure();
+  const axiosSecure = useAxiosSecure();
+  const queryClient = useQueryClient()
+  
+ const {data: jobs, } = useQuery({
+   queryKey: ['jobs', user?.email],
+   queryFn: async () => {
+     const { data } = await axiosSecure.get(
+       `/jobs/${user?.email}`);
+     return data
+   }
+ })
+  
+  // const { mutateAsync } = useMutation({
+  //   mutationFn: async ({id}) => {
+  //     console.log('hello from tanstack query, mr.',id)
+      
+  //   },
+  //   onSuccess: () => {
 
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const { data } = await axiosSecure.get(
-          `/jobs/${user?.email}`
-        );
+  //   }
+  // })
 
-        setJobs(data);
-      } catch (error) {
-        console.error('Error fetching jobs:', error);
-      }
-    };
+  // deleting a data from the UI and database
+ const { mutateAsync } = useMutation({
+   mutationFn: async ({ id }) => {
+     console.log(id);
+     const { data } = await axiosSecure.delete(`/job/${id}`);
+     return data;
+   },
+   onMutate: async ({ id }) => {
+     // Get the current cached data
+     const previousData = queryClient.getQueryData(['jobs', user?.email]);
 
-    if (user?.email) {
-      getData();
-    }
-  }, [user?.email]);
+     // Optimistically update to the new state
+     queryClient.setQueryData(['jobs', user?.email], (oldData) => {
+       return oldData.filter((job) => job._id !== id);
+     });
+
+     // Return a context object with the previous data
+     return { previousData };
+   },
+   onError: (error, context) => {
+     // Roll back to the previous state if the mutation fails
+     queryClient.setQueryData(['jobs', user?.email], context.previousData);
+     console.log(error.message);
+       toast.error('Failed to delete the job');
+   },
+   onSuccess: (data) => {
+     if (data.deletedCount > 0) {
+       toast.success('Job deleted successfully');
+     }
+   },
+ });
+
+
+  // useEffect(() => {
+  //   const getData = async () => {
+  //     try {
+  //       const { data } = await axiosSecure.get(
+  //         `/jobs/${user?.email}`
+  //       );
+
+  //       setJobs(data);
+  //     } catch (error) {
+  //       console.error('Error fetching jobs:', error);
+  //     }
+  //   };
+
+  //   if (user?.email) {
+  //     getData();
+  //   }
+  // }, [user?.email]);
 
   
   const handleDelete = async (id) => {
-    try {
-      const { data } = await axiosSecure.delete(
-        `/job/${id}`)
+    // try {
+    //   const { data } = await axiosSecure.delete(
+    //     `/job/${id}`)
 
-        if (data.deletedCount > 0) {
-          toast.success('Job deleted successfully')
-          const remaining = jobs.filter(job => job._id !== id);
-          setJobs(remaining);
-        }
-    } catch (error) {
-      console.log(error.message)
+    //     if (data.deletedCount > 0) {
+    //       toast.success('Job deleted successfully')
+    //       const remaining = jobs.filter(job => job._id !== id);
+    //       setJobs(remaining);
+    //     }
+    // } catch (error) {
+    //   console.log(error.message)
       
-    }
+    // }
+    await mutateAsync({id})
 }
   
 
@@ -56,7 +111,7 @@ const MyPostedJobs = () => {
         <h2 className='text-lg font-medium text-gray-800 '>My Posted Job(s)</h2>
 
         <span className='px-3 py-1 text-xs text-blue-600 bg-blue-100 rounded-full '>
-          {jobs.length}
+          {jobs?.length}
         </span>
       </div>
 
@@ -111,7 +166,7 @@ const MyPostedJobs = () => {
                   </tr>
                 </thead>
                 <tbody className='bg-white divide-y divide-gray-200 '>
-                  {jobs.map((job) => (
+                  {jobs?.map((job) => (
                     <tr key={job._id}>
                       <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>
                         {job.job_title}

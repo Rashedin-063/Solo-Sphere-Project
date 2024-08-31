@@ -30,7 +30,7 @@ const TabCAtegories = () => {
         <Tabs>
           <TabList>
             <Tab>Web Development</Tab>
-            <Tab>UI / Ux Design</Tab>
+            <Tab>Graphics Design</Tab>
             <Tab>Digital Marketing</Tab>
           </TabList>
 
@@ -46,7 +46,11 @@ const TabCAtegories = () => {
           <TabPanel>
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  justify-center items-center gap-x-4 w-3/4 mx-auto md:w-full'>
               {jobs
-                .filter((j) => j.category === 'UI/UX Design')
+                .filter(
+                  (j) =>
+                    j.category === 'UI/UX Design' ||
+                    j.category === 'Graphics Design'
+                )
                 .map((job) => (
                   <JobCard key={job._id} job={job} />
                 ))}

@@ -159,7 +159,8 @@ console.log(loggedUser)
     }) 
 
     // bids related api
-    app.get('/my-bids/:email', verifyToken, async (req, res) => {
+    // add verifyToken
+    app.get('/my-bids/:email', verifyToken,  async (req, res) => {
       const email = req.params.email;
       const query = { email };
       const result = await bidCollection.find(query).toArray();
@@ -178,10 +179,22 @@ console.log(loggedUser)
 
     app.post('/bids', async (req, res) => {
       const bidData = req.body;
+  
+      //check if it's a duplicate request
+      const query = {
+        email: bidData.email,
+        jobId: bidData.jobId,
+      };
+      const alreadyApplied = await bidCollection.findOne(query)
+      
+      if (alreadyApplied) {
+        return res.status(400).send({message: 'The bid is already placed'})
+      }
 
       const result = await bidCollection.insertOne(bidData);
 
-      res.send(result)
+      res.send(result);
+     
     })
 
     // update bid request

@@ -2,49 +2,69 @@ import { useEffect, useState } from 'react';
 import useAuth from '../hooks/useAuth';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import useAxiosSecure from '../hooks/useAxiosSecure';
 
 const MyBids = () => {
   const { user } = useAuth();
+  const axiosSecure = useAxiosSecure()
+  const queryClient = useQueryClient()
 
-  const [bids, setBids] = useState([]);
+  // const [bids, setBids] = useState([]);
 
-  useEffect(() => {
-if (user?.email) {
-       getData();
-     }
-  }, []);
+//   useEffect(() => {
+// if (user?.email) {
+//        getData();
+//      }
+//   }, []);
 
-   const getData = async () => {
-     try {
-       const { data } = await axios.get(
-         `${import.meta.env.VITE_API_URL}/my-bids/${user?.email}`
-       );
-       setBids(data);
-     } catch (error) {
-       console.log('error fetching data', error);
-     }
-   };
+  const { data: bids, isLoading } = useQuery({
+    queryKey: ['bids', user?.email],
+    queryFn: async() => {
+      const { data } = await axiosSecure.get(
+        `/my-bids/${user?.email}`
+      );
+      return data;
+    } 
+  })
+
+  //  const getData = async () => {
+  //    try {
+  //      const { data } = await axios.get(
+  //        `${import.meta.env.VITE_API_URL}/my-bids/${user?.email}`
+  //      );
+  //      setBids(data);
+  //    } catch (error) {
+  //      console.log('error fetching data', error);
+  //    }
+  //  };
+
+  const {mutateAsync } = useMutation({
+    mutationFn: async ({ id, status }) => {
+      const { data } = await axiosSecure.patch(
+        `/bid/${id}`, 
+        { status }
+      );
+      return data;
+    },
+    onSuccess: (data) => {
+      if (data.modifiedCount > 0) {
+        toast.success('Your Status is updated successfully');
+        // Optionally refetch or invalidate queries if necessary
+        queryClient.invalidateQueries(['bids']);
+      }
+    },
+    onError: (error) => {
+      toast.error(`Error updating status: ${error.message}`);
+    },
+  });
+  
 
 
   const handleStatus = async (id, status) => {
-
-  try {
-      const { data } = await axios.patch(
-        `${import.meta.env.VITE_API_URL}/bid/${id}`, {status} 
-      );
-
-      console.log(data)
-      if (data.modifiedCount > 0) {
-        toast.success('Your Status is updated successfully');
-        getData()
-      }
-    
-    } catch (error) {
-      console.log('Error fetching data', error)
-      
-    }
+    await mutateAsync({id, status})
 }
-  
+ if(isLoading) return <p>Data is Loading</p> 
 
   return (
     <section className='container px-4 mx-auto pt-12'>
@@ -52,7 +72,7 @@ if (user?.email) {
         <h2 className='text-lg font-medium text-gray-800 '>My Bids</h2>
 
         <span className='px-3 py-1 text-xs text-blue-600 bg-blue-100 rounded-full font-semibold'>
-          {bids.length} <span className='pl-1 font-normal'>{bids.length < 2 ? 'Bid' : 'Bids' }</span>
+          {bids?.length} <span className='pl-1 font-normal'>{bids.length < 2 ? 'Bid' : 'Bids' }</span>
         </span>
       </div>
 
@@ -108,7 +128,7 @@ if (user?.email) {
                   </tr>
                 </thead>
                 <tbody className='bg-white divide-y divide-gray-200 '>
-                  {bids.map((bid) => (
+                  {bids?.map((bid) => (
                     <tr key={bid._id}>
                       <td className='px-4 py-4 text-sm text-gray-500  whitespace-nowrap'>
                         {bid.job_title}

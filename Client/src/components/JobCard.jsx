@@ -20,7 +20,9 @@ const JobCard = ({ job }) => {
             category === 'Web Development' &&
             'text-blue-600 uppercase bg-blue-100'
           } ${
-            category === 'UI/UX Design' && 'text-red-600 uppercase bg-red-100'
+            category === 'UI/UX Design' ||
+            category === 'Graphics Design' ?
+              'text-red-600 uppercase bg-red-100' : ''
           } ${
             category === 'Digital Marketing' &&
             'text-green-600 uppercase bg-green-100'

@@ -50,7 +50,6 @@ const JobDetails = () => {
 
 try {
   const {data} = await axios.post(`${import.meta.env.VITE_API_URL}/bids`, bidData);
-  console.log(data)
 
   if (data.insertedId) {
     toast.success('Your bid is placed successfully')
@@ -58,7 +57,7 @@ try {
     navigate('/myBids')
   }  
 } catch (error) {
-  console.log(error.message)
+  console.log('Error in job details page', error.message)
   
 }   
   }
@@ -116,6 +115,7 @@ try {
                 id='price'
                 type='text'
                 name='price'
+                required
                 placeholder={`$${min_price} - $${max_price}`}
                 className='block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md   focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40  focus:outline-none focus:ring'
               />

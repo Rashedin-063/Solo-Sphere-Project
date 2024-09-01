@@ -9,9 +9,13 @@ const port = process.env.PORT || 5000;
 const app = express();
 
 const corsOption = {
-  origin: ['http://localhost:5173'],
+  origin: [
+    'http://localhost:5173',
+    'https://solosphere-project-d3e93.web.app',
+    'https://solosphere-project-d3e93.firebaseapp.com',
+  ],
   credentials: true,
-  optionSuccessStatus: 2000
+  optionSuccessStatus: 2000,
 };
 
 // middleware
@@ -104,28 +108,41 @@ async function run() {
       const size = parseInt(req.query.size);
       const page = parseInt(req.query.page);
       const filter = req.query.filter;
+      const sort = req.query.sort;
+      const search = req.query.search
 
-      let query = {};
+      let query = {
+        job_title: { $regex: search, $options: 'i' },
+      };
 
-      if(filter) query ={ category: filter}
+      if (filter) query.category = filter
+      // if(filter) query = {...query, filter}
+      
+      let options = {};
+
+      if(sort) options = {sort: {deadline: sort === 'asc' ? 1 : -1}}
 
       const result = await jobCollection
-        .find(query)
+        .find(query, options)
         .skip((page-1)*size)
         .limit(size)
         .toArray();
+      
         res.send(result);
       });
 
     app.get('/jobCount', async (req, res) => {
       const filter = req.query.filter;
+         const search = req.query.search;
   
-      let query = {};
+   let query = {
+     job_title: { $regex: search, $options: 'i' },
+   };
 
-      if (filter) query = { category: filter };
+   if (filter) query.category = filter;
       
      try {
-       const count = await jobCollection.estimatedDocumentCount();
+       const count = await jobCollection.countDocuments(query);
     
        res.send({ count });
      } catch (error) {
